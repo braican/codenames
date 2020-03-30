@@ -5,13 +5,15 @@ $c--white: #ffffff;
 $c--gray-f: #f2f7f7;
 $c--gray-e: #e2e7e7;
 $c--black: #000000;
-$c--orange: #ff6b45;
+$c--orange: #ff911f;
+
+$c--primary: $c--orange;
 
 // Type
 // -----------
 
 // Family
-$ff--base: Helvetica, Arial, sans-serif;
+$ff--base: "Roboto", Helvetica, Arial, sans-serif;
 
 // Line height
 $lh--base: 1.4;
@@ -30,6 +32,11 @@ $fw--light: 100;
 // -----------
 
 $spacing: 1.6rem;
+
+// Breakpoints
+// -----------
+
+$bp--tablet: 600px;
 
 // Misc
 // -----------

@@ -1,0 +1,20 @@
+@mixin transition(
+  $properties: all,
+  $duration: 200ms,
+  $method: ease,
+  $delay: 0ms
+) {
+  $value: ();
+  @each $property in $properties {
+    @if length($value) > 0 {
+      $value: append(
+        $value,
+        unquote(",") #{$property} $duration $method $delay
+      );
+    } @else {
+      $value: append($value, #{$property} $duration $method $delay);
+    }
+  }
+
+  transition: $value;
+}

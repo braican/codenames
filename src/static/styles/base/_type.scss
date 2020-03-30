@@ -40,9 +40,15 @@ button {
 }
 
 .button {
-  background-color: $c--orange;
-  padding: 0.7em;
+  @include transition(background-color);
+  @include button-shadow;
+  background-color: $c--primary;
+  padding: 0.6em 0.8em;
   font-weight: $fw--bold;
-  font-size: $fz--lg;
   color: $c--white;
+  transition: background-color time;
+
+  &:hover {
+    background-color: darken($c--primary, 6%);
+  }
 }
