@@ -1,13 +1,14 @@
-@mixin button-shadow($depth: 8, $color: $c--orange) {
-  // $shadow: "1px 1px 0 rgba(darken($c--orange, 45%), 0.4)";
+@mixin button-shadow($depth: 8, $color: $c--orange, $shadow-color: darken($color, 26%)) {
   $shadow: ();
   @for $i from 1 to $depth {
     $shadow: append($shadow, #{$i}px #{$i}px 0 darken($color, 20%), comma);
   }
 
+  position: relative;
   background-color: $color;
   box-shadow: $shadow;
   margin-bottom: #{$depth}px;
+  left: #{$depth * -1}px;
 
   &:focus {
     outline: 1px solid black;
@@ -17,12 +18,12 @@
     $activeShadow: ();
 
     @for $i from 1 to $depth - 2 {
-      $activeShadow: append($activeShadow, #{$i}px #{$i}px 0 darken($color, 26%), comma);
+      $activeShadow: append($activeShadow, #{$i}px #{$i}px 0 $shadow-color, comma);
     }
 
-    position: relative;
     box-shadow: $activeShadow;
     top: 2px;
     left: 2px;
+    left: #{$depth * -1 + 2}px;
   }
 }

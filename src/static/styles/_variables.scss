@@ -6,7 +6,8 @@ $c--gray-f: #f2f7f7;
 $c--gray-e: #e2e7e7;
 $c--black: #000000;
 $c--orange: #ff911f;
-$c--red: #c00;
+$c--red: #d13030;
+$c--blue: #4183cc;
 
 $c--primary: $c--orange;
 
@@ -14,7 +15,7 @@ $c--primary: $c--orange;
 // -----------
 
 // Family
-$ff--base: "Roboto", Helvetica, Arial, sans-serif;
+$ff--base: 'Roboto', Helvetica, Arial, sans-serif;
 
 // Line height
 $lh--base: 1.4;
@@ -26,7 +27,7 @@ $fz--lg: 1.2rem;
 $fz--xl: 2.5rem;
 
 // Font weight
-$fw--bold: 700;
+$fw--bold: 500;
 $fw--light: 100;
 
 // Spacing
@@ -38,6 +39,7 @@ $spacing: 1.6rem;
 // -----------
 
 $bp--tablet: 600px;
+$bp--desktop: 900px;
 
 // Misc
 // -----------

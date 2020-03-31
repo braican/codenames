@@ -10,7 +10,7 @@
 
 <script>
 import { gamesCollection } from '@/firebase';
-import { retrieveWords, randomSubset } from '@/utils';
+import { getGameboard } from '@/utils';
 
 export default {
   name: 'StartGame',
@@ -24,24 +24,19 @@ export default {
     async startGame() {
       this.loading = true;
 
-      const words = await retrieveWords();
+      const gameboard = await getGameboard();
 
-      if (words.length === 0) {
+      if (!gameboard) {
         this.loading = false;
         this.error = true;
         return;
       }
 
-      const gameWords = randomSubset(words, 30);
-
-      gamesCollection
-        .add({
-          words: gameWords,
-        })
-        .then(docRef => {
-          console.log(`Created game with ID of ${docRef.id}`);
-          this.$router.push(`/g/${docRef.id}`);
-        });
+      gamesCollection.add({ board: gameboard }).then(docRef => {
+        console.log(`Created game with ID of ${docRef.id}`);
+        this.$store.commit('setGameboard', gameboard);
+        this.$router.push(`/g/${docRef.id}`);
+      });
     },
   },
 };
