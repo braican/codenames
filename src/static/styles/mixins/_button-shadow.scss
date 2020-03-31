@@ -10,18 +10,14 @@
   margin-bottom: #{$depth}px;
 
   &:focus {
-    outline: none;
+    outline: 1px solid black;
   }
 
   &:active {
     $activeShadow: ();
 
     @for $i from 1 to $depth - 2 {
-      $activeShadow: append(
-        $activeShadow,
-        #{$i}px #{$i}px 0 darken($color, 26%),
-        comma
-      );
+      $activeShadow: append($activeShadow, #{$i}px #{$i}px 0 darken($color, 26%), comma);
     }
 
     position: relative;

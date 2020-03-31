@@ -1,9 +1,6 @@
 <template>
   <div id="app" class="app">
-    <div>
-      <h1 class="app-title">Codenames</h1>
-      <router-view/>
-    </div>
+    <router-view/>
   </div>
 </template>
 
@@ -24,14 +21,4 @@ export default {
   align-items: center;
 }
 
-.app-title {
-  font-weight: $fw--bold;
-  text-transform: uppercase;
-  font-size: 1rem;
-  letter-spacing: 1em;
-
-  @include mq($bp--tablet) {
-    font-size: 3vw;
-  }
-}
 </style>

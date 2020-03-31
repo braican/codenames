@@ -1,47 +1,30 @@
 <template>
-  <div class="lets-go">
-    <button :class="['button', {'is-loading': loading}]" @click="startGame">Start a game</button>
-    <p class="loading" v-if="loading">Loading...</p>
+  <div>
+    <h1 class="app-title">Codenames</h1>
+    <StartGame />
   </div>
 </template>
 
 <script>
+import StartGame from '@/components/StartGame';
+
 export default {
   name: 'Home',
-  data() {
-    return {
-      loading: false
-    }
-  },
-  methods: {
-    startGame() {
-      this.loading = true;
-
-    }
-  }
+  components: { StartGame },
 }
 </script>
 
-
 <style lang="scss" scoped>
-.lets-go {
-  margin-top: 4vh;
-  position: relative;
-}
+@import '@/static/styles/_abstracts.scss';
 
-.button {
-  font-size: 2rem;
+.app-title {
+  font-weight: $fw--bold;
+  text-transform: uppercase;
+  font-size: 1rem;
+  letter-spacing: 1em;
 
-  &.is-loading {
-    visibility: hidden;
+  @include mq($bp--tablet) {
+    font-size: 3vw;
   }
 }
-
-.loading {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
 </style>
-

@@ -52,3 +52,19 @@ button {
     background-color: darken($c--primary, 6%);
   }
 }
+
+// Headers
+// -----------
+
+h2 {
+  font-size: 2rem;
+  font-weight: $fw--bold;
+  margin-bottom: 1em;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: $fw--bold;
+  box-shadow: inset 0 -0.25em 0 rgba($c--primary, 0.5);
+  margin-bottom: 1em;
+}
