@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { vuexfireMutations, firestoreAction } from 'vuexfire';
 import { auth, gamesCollection } from '@/firebase';
+import { getGameboard } from '@/utils';
 
 Vue.use(Vuex);
 
@@ -13,9 +14,10 @@ const store = new Vuex.Store({
       board: null,
       turn: null,
     },
-    winner: 'Blue',
+    winner: null,
     redScore: 0,
     blueScore: 0,
+    locked: false,
   },
   getters: {
     board: state => state.game.board,
@@ -42,16 +44,37 @@ const store = new Vuex.Store({
     setBlueScore(state, val) {
       state.blueScore = val;
     },
+    setWinner(state, val) {
+      state.winner = val;
+      state.locked = true;
+    },
+    unlockBoard(state, val) {
+      state.locked = false;
+    },
   },
   actions: {
     decrementRed({ state, commit }) {
-      commit('setRedScore', state.redScore - 1);
+      const newScore = state.redScore - 1;
+      commit('setRedScore', newScore);
+      if (newScore < 1) {
+        commit('setWinner', 'Red');
+      }
     },
     decrementBlue({ state, commit }) {
-      commit('setBlueScore', state.blueScore - 1);
+      const newScore = state.blueScore - 1;
+      commit('setBlueScore', newScore);
+      if (newScore < 1) {
+        commit('setWinner', 'Blue');
+      }
     },
 
-    async createNewGame({ commit, dispatch }, board) {
+    async createNewGame({ commit, dispatch }) {
+      const board = await getGameboard();
+
+      if (!board) {
+        throw new Error('There was a problem getting the gameboard.');
+      }
+
       const gameData = await dispatch('setupGame', { board });
 
       return gamesCollection.add(gameData).then(docRef => {
@@ -59,6 +82,25 @@ const store = new Vuex.Store({
         commit('setGameId', docRef.id);
         return docRef.id;
       });
+    },
+
+    async createNewBoard({ commit, state, dispatch }) {
+      if (!state.gameId) {
+        return dispatch('createNewGame');
+      }
+
+      const board = await getGameboard();
+
+      if (!board) {
+        throw new Error('There was a problem getting the gameboard.');
+      }
+
+      commit('unlockBoard');
+      commit('setWinner', null);
+
+      const gameData = await dispatch('setupGame', { board });
+
+      return gamesCollection.doc(state.gameId).set(gameData);
     },
 
     updateGame({ commit, state }, { board, swapTurn }) {
@@ -87,17 +129,21 @@ const store = new Vuex.Store({
       }
 
       commit('setGameboard', board);
-      commit('setTurn', turn);
       commit('setRedScore', redScore);
       commit('setBlueScore', blueScore);
+      commit('setTurn', turn);
+
+      if (redScore < 1) {
+        commit('setWinner', 'Red');
+      } else if (blueScore < 1) {
+        commit('setWinner', 'Blue');
+      }
 
       return { board, turn };
     },
 
     bindGameboard: firestoreAction(({ bindFirestoreRef, dispatch, commit }, gameId) => {
       return bindFirestoreRef('game', gamesCollection.doc(gameId)).then(({ board, turn }) => {
-        console.log(turn);
-
         dispatch('setupGame', { board, turn });
         commit('setGameId', gameId);
       });

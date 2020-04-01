@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import { getGameboard } from '@/utils';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'StartGame',
@@ -20,20 +20,20 @@ export default {
     };
   },
   methods: {
+    ...mapActions(['createNewGame']),
+
     async startGame() {
       this.loading = true;
 
-      const gameboard = await getGameboard();
-
-      if (!gameboard) {
-        this.loading = false;
-        this.error = true;
-        return;
-      }
-
-      this.$store.dispatch('createNewGame', gameboard).then(gameId => {
-        this.$router.push(`/g/${gameId}`);
-      });
+      this.$store
+        .dispatch('createNewGame')
+        .catch(error => {
+          this.loading = false;
+          this.error = true;
+        })
+        .then(gameId => {
+          this.$router.push(`/g/${gameId}`);
+        });
     },
   },
 };

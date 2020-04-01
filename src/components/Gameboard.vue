@@ -5,6 +5,7 @@
       v-for="(cell, index) in board"
       :key="cell.word"
       @click="() => handleCellClick(cell, index)"
+      :disabled="locked"
     >
       {{ cell.word }}
       <br />
@@ -14,15 +15,18 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 
 export default {
   name: 'Gameboard',
   computed: {
+    ...mapState(['locked']),
     ...mapGetters(['board', 'turn']),
   },
   methods: {
     ...mapActions(['decrementRed', 'decrementBlue', 'updateGame']),
+    ...mapMutations(['setWinner']),
+
     getCellClass(cell) {
       if (cell.hidden) {
         return;
@@ -41,6 +45,10 @@ export default {
       return null;
     },
     handleCellClick(cell, index) {
+      if (this.locked) {
+        return;
+      }
+
       const newCell = { ...cell, hidden: false };
       const newBoard = [...this.board];
       const cellOwner = cell.owner;
@@ -53,7 +61,7 @@ export default {
       newBoard[index] = newCell;
 
       if (cellOwner === 'black') {
-        console.log(`${activeTurn} loses`);
+        this.setWinner(activeTurn === 'Red' ? 'Blue' : 'Red');
       } else if (cellOwner === 'red' && activeTurn === 'Red') {
         this.decrementRed();
       } else if (cellOwner === 'blue' && activeTurn === 'Blue') {

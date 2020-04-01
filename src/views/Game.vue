@@ -22,15 +22,25 @@
             End {{ turn }}'s turn
           </button>
         </div>
+
+        <div v-if="winner" class="winner">
+          <p :class="['winner-status', `winner-status--${winner.toLowerCase()}`]">
+            {{ winner }} team wins
+          </p>
+
+          <div class="postgame-actions">
+            <button v-if="!loading" class="button play-again-btn" @click="playAgain">
+              Play again
+            </button>
+
+            <p v-else>Loading...</p>
+          </div>
+        </div>
       </header>
 
       <button @click="reset">Reset</button>
 
       <Gameboard />
-
-      <div v-if="winner" :class="['winner', `winner--${winner.toLowerCase()}`]">
-        {{ winner }} team wins
-      </div>
     </div>
 
     <div v-else class="loading">
@@ -47,12 +57,17 @@ import Gameboard from '@/components/Gameboard';
 export default {
   name: 'Game',
   components: { Gameboard },
+  data() {
+    return {
+      loading: false,
+    };
+  },
   computed: {
     ...mapState(['redScore', 'blueScore', 'gameId', 'winner']),
     ...mapGetters(['board', 'turn']),
   },
   methods: {
-    ...mapActions(['updateGame']),
+    ...mapActions(['updateGame', 'createNewBoard']),
 
     // @TODO: remove
     reset() {
@@ -69,6 +84,11 @@ export default {
 
     swapTurns() {
       this.updateGame({ board: this.board, swapTurn: true });
+    },
+
+    playAgain() {
+      this.loading = true;
+      this.createNewBoard();
     },
   },
   mounted() {
@@ -124,16 +144,13 @@ export default {
 
 .winner {
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 20px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba($c--white, 0.9);
+  height: 60px;
+}
+
+.winner-status {
   font-size: 2rem;
+  margin-right: 2rem;
   font-weight: $fw--bold;
 
   &--blue {
@@ -142,5 +159,10 @@ export default {
   &--red {
     color: $c--red;
   }
+}
+
+.postgame-actions {
+  text-align: right;
+  width: 120px;
 }
 </style>
