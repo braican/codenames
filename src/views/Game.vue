@@ -2,26 +2,28 @@
   <div class="game">
     <p class="game-label">Game - {{ $route.params.gameId }}</p>
 
-    <div v-if="gameboard">
+    <div v-if="game.board">
       <header class="meta">
         <div class="score">
-          <span class="red-team">{{ redScore }}</span> &mdash;
-          <span class="blue-team">{{ blueScore }}</span>
+          <span class="red-team">{{ game.redScore }}</span> &mdash;
+          <span class="blue-team">{{ game.blueScore }}</span>
         </div>
 
-        <div :class="['turn', turn === 'Red' ? 'red-team' : 'blue-team']">Turn: {{ turn }}</div>
+        <div :class="['turn', game.turn === 'Red' ? 'red-team' : 'blue-team']">
+          Turn: {{ game.turn }}
+        </div>
 
         <div class="turn-trigger">
           <button
             type="button"
-            :class="['button', turn === 'Red' ? 'button--red-team' : 'button--blue-team']"
+            :class="['button', game.turn === 'Red' ? 'button--red-team' : 'button--blue-team']"
           >
-            End {{ turn }}'s turn
+            End {{ game.turn }}'s turn
           </button>
         </div>
       </header>
 
-      <Gameboard :board="gameboard" :game="$route.params.gameId" />
+      <Gameboard :board="game.board" :game="$route.params.gameId" />
     </div>
 
     <div v-else class="loading">
@@ -39,14 +41,13 @@ export default {
   name: 'Game',
   components: { Gameboard },
   computed: {
-    ...mapState(['gameboard', 'turn', 'redScore', 'blueScore']),
+    ...mapState(['game']),
   },
   mounted() {
-    if (!this.gameboard) {
-      gamesCollection.doc(this.$route.params.gameId).onSnapshot(doc => {
-        const { board } = doc.data();
-        this.$store.commit('setGameboard', board);
-      });
+    this.$store.commit('setGameId', this.$route.params.gameId);
+
+    if (!this.game.board) {
+      this.$store.dispatch('bindGameboard', this.$route.params.gameId);
     }
   },
 };

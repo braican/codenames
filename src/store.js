@@ -1,30 +1,35 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { auth } from '@/firebase';
+import { vuexfireMutations, firestoreAction } from 'vuexfire';
+import { auth, gamesCollection } from '@/firebase';
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
     currentUser: null,
-    gameboard: null,
-    turn: null,
-    redScore: 0,
-    blueScore: 0,
+    gameId: null,
+    game: {
+      board: null,
+      turn: null,
+      redScore: 0,
+      blueScore: 0,
+    },
   },
   mutations: {
+    ...vuexfireMutations,
+
     setCurrentUser(state, val) {
       state.currentUser = val;
     },
+    setGameId(state, val) {
+      state.gameId = val;
+    },
+    setGame(state, val) {
+      state.game = val;
+    },
     setGameboard(state, val) {
-      const redScore = val.filter(c => c.owner === 'red').length;
-      const blueScore = val.filter(c => c.owner === 'blue').length;
-      const turn = redScore > blueScore ? 'Red' : 'Blue';
-
-      state.gameboard = val;
-      state.turn = turn;
-      state.redScore = redScore;
-      state.blueScore = blueScore;
+      state.game = { ...state.game, board: val };
     },
     setTurn(state, val) {
       state.turn = val;
@@ -36,7 +41,32 @@ const store = new Vuex.Store({
       state.blueScore = val;
     },
   },
-  actions: {},
+  actions: {
+    setupNewGame({ commit, dispatch }, board) {
+      return gamesCollection.add({ board }).then(docRef => {
+        console.log(`Created game with ID of ${docRef.id}`);
+        commit('setGameId', docRef.id);
+        dispatch('setupGameboard', board);
+        return docRef.id;
+      });
+    },
+    setupGameboard({ commit }, board) {
+      const redScore = board.filter(c => c.owner === 'red').length;
+      const blueScore = board.filter(c => c.owner === 'blue').length;
+      const turn = redScore > blueScore ? 'Red' : 'Blue';
+      commit('setGame', { board, turn, redScore, blueScore });
+    },
+    updateGameboard({ commit, state }, board) {
+      commit('setGameboard', board);
+      gamesCollection
+        .doc(state.gameId)
+        .set({ board })
+        .catch(error => console.error(error));
+    },
+    bindGameboard: firestoreAction(({ bindFirestoreRef }, gameId) => {
+      return bindFirestoreRef('game', gamesCollection.doc(gameId));
+    }),
+  },
 });
 
 auth.onAuthStateChanged(user => {

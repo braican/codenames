@@ -1,23 +1,20 @@
 <template>
   <div class="gameboard">
     <button
-      :class="[
-        'cell',
-        { 'cell--red': cell.hidden === false && cell.owner === 'red' },
-        { 'cell--blue': cell.hidden === false && cell.owner === 'blue' },
-      ]"
+      :class="['cell', getCellClass(cell)]"
       v-for="(cell, index) in board"
       :key="cell.word"
-      @click="() => handleCellSelect(cell, index)"
+      @click="() => handleCellClick(cell, index)"
     >
       {{ cell.word }}
+      <br />
+      {{ cell.owner }}
     </button>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
-import { gamesCollection } from '@/firebase';
 
 export default {
   name: 'Gameboard',
@@ -35,7 +32,24 @@ export default {
     ...mapState(['turn']),
   },
   methods: {
-    handleCellSelect(cell, index) {
+    getCellClass(cell) {
+      if (cell.hidden) {
+        return;
+      }
+
+      if (cell.owner === 'neutral') {
+        return 'cell--neutral';
+      } else if (cell.owner === 'red') {
+        return 'cell--red';
+      } else if (cell.owner === 'blue') {
+        return 'cell--blue';
+      } else if (cell.owner === 'black') {
+        return 'cell--black';
+      }
+
+      return null;
+    },
+    handleCellClick(cell, index) {
       const newCell = { ...cell };
       const newBoard = [...this.board];
       const owner = cell.owner;
@@ -43,14 +57,7 @@ export default {
 
       newBoard[index] = newCell;
 
-      this.$store.commit('setGameboard', newBoard);
-
-      gamesCollection
-        .doc(this.game)
-        .set({ board: newBoard })
-        .then(docRef => {
-          console.log('Success');
-        });
+      this.$store.dispatch('updateGameboard', newBoard);
     },
   },
 };
@@ -89,6 +96,10 @@ export default {
   &--blue {
     background-color: $c--blue;
     color: $c--white;
+  }
+
+  &--neutral {
+    background-color: $c--gray-c;
   }
 }
 </style>

@@ -9,7 +9,6 @@
 </template>
 
 <script>
-import { gamesCollection } from '@/firebase';
 import { getGameboard } from '@/utils';
 
 export default {
@@ -32,10 +31,8 @@ export default {
         return;
       }
 
-      gamesCollection.add({ board: gameboard }).then(docRef => {
-        console.log(`Created game with ID of ${docRef.id}`);
-        this.$store.commit('setGameboard', gameboard);
-        this.$router.push(`/g/${docRef.id}`);
+      this.$store.dispatch('setupNewGame', gameboard).then(gameId => {
+        this.$router.push(`/g/${gameId}`);
       });
     },
   },

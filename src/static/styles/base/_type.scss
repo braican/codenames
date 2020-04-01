@@ -60,6 +60,15 @@ button {
       background-color: darken($c--red, 6%);
     }
   }
+
+  &--blue-team {
+    @include button-shadow($color: $c--blue);
+    background-color: $c--blue;
+
+    &:hover {
+      background-color: darken($c--blue, 6%);
+    }
+  }
 }
 
 // Headers
