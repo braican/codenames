@@ -2,19 +2,22 @@
   <div class="game">
     <p class="game-label">Game - {{ $route.params.gameId }}</p>
 
-    <div v-if="game">
+    <div v-if="board" class="game-wrapper">
       <header class="meta">
         <div class="score">
           <span class="red-team">{{ redScore }}</span> &mdash;
           <span class="blue-team">{{ blueScore }}</span>
         </div>
 
-        <div :class="['turn', turn === 'Red' ? 'red-team' : 'blue-team']">Turn: {{ turn }}</div>
+        <div v-if="winner === null" :class="['turn', turn === 'Red' ? 'red-team' : 'blue-team']">
+          Turn: {{ turn }}
+        </div>
 
-        <div class="turn-trigger">
+        <div class="turn-trigger" v-if="winner === null">
           <button
             type="button"
             :class="['button', turn === 'Red' ? 'button--red-team' : 'button--blue-team']"
+            @click="swapTurns"
           >
             End {{ turn }}'s turn
           </button>
@@ -24,6 +27,10 @@
       <button @click="reset">Reset</button>
 
       <Gameboard />
+
+      <div v-if="winner" :class="['winner', `winner--${winner.toLowerCase()}`]">
+        {{ winner }} team wins
+      </div>
     </div>
 
     <div v-else class="loading">
@@ -33,7 +40,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import { gamesCollection } from '@/firebase';
 import Gameboard from '@/components/Gameboard';
 
@@ -41,23 +48,31 @@ export default {
   name: 'Game',
   components: { Gameboard },
   computed: {
-    ...mapState(['game', 'turn', 'redScore', 'blueScore']),
+    ...mapState(['redScore', 'blueScore', 'gameId', 'winner']),
+    ...mapGetters(['board', 'turn']),
   },
   methods: {
-    ...mapActions(['updateGameboard']),
+    ...mapActions(['updateGame']),
+
+    // @TODO: remove
     reset() {
-      if (!this.game) {
+      if (!this.board) {
         return;
       }
 
-      const cleanGameboard = this.game.board.map(c => ({ ...c, hidden: true }));
-      this.updateGameboard(cleanGameboard);
+      const cleanGameboard = this.board.map(c => ({ ...c, hidden: true }));
+      const redScore = cleanGameboard.filter(c => c.owner === 'red').length;
+      const blueScore = cleanGameboard.filter(c => c.owner === 'blue').length;
+      const turn = redScore > blueScore ? 'Red' : 'Blue';
+      this.updateGame({ board: cleanGameboard, swapTurn: this.turn !== turn });
+    },
+
+    swapTurns() {
+      this.updateGame({ board: this.board, swapTurn: true });
     },
   },
   mounted() {
-    this.$store.commit('setGameId', this.$route.params.gameId);
-
-    if (!this.game) {
+    if (!this.gameId) {
       this.$store.dispatch('bindGameboard', this.$route.params.gameId);
     }
   },
@@ -69,6 +84,10 @@ export default {
 
 .game {
   width: 100%;
+}
+
+.game-wrapper {
+  position: relative;
 }
 
 .game-label {
@@ -101,5 +120,27 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.winner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba($c--white, 0.9);
+  font-size: 2rem;
+  font-weight: $fw--bold;
+
+  &--blue {
+    color: $c--blue;
+  }
+  &--red {
+    color: $c--red;
+  }
 }
 </style>

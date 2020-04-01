@@ -31,7 +31,7 @@ export default {
         return;
       }
 
-      this.$store.dispatch('setupNewGame', gameboard).then(gameId => {
+      this.$store.dispatch('createNewGame', gameboard).then(gameId => {
         this.$router.push(`/g/${gameId}`);
       });
     },

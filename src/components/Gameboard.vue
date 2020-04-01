@@ -2,7 +2,7 @@
   <div class="gameboard">
     <button
       :class="['cell', getCellClass(cell)]"
-      v-for="(cell, index) in game.board"
+      v-for="(cell, index) in board"
       :key="cell.word"
       @click="() => handleCellClick(cell, index)"
     >
@@ -14,15 +14,15 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'Gameboard',
   computed: {
-    ...mapState(['game', 'gameId', 'turn']),
+    ...mapGetters(['board', 'turn']),
   },
   methods: {
-    ...mapActions(['decrementRed', 'decrementBlue', 'swapTurn', 'updateGameboard']),
+    ...mapActions(['decrementRed', 'decrementBlue', 'updateGame']),
     getCellClass(cell) {
       if (cell.hidden) {
         return;
@@ -42,26 +42,25 @@ export default {
     },
     handleCellClick(cell, index) {
       const newCell = { ...cell, hidden: false };
-      const newBoard = [...this.game.board];
-      const owner = cell.owner;
-      const currentTurn = this.turn;
-      newBoard[index] = newCell;
-      this.updateGameboard(newBoard);
+      const newBoard = [...this.board];
+      const cellOwner = cell.owner;
+      const activeTurn = this.turn;
+      const swapTurn =
+        cellOwner === 'neutral' ||
+        (cellOwner === 'red' && activeTurn !== 'Red') ||
+        (cellOwner === 'blue' && activeTurn !== 'Blue');
 
-      if (owner === 'black') {
-        console.log(`${currentTurn} loses`);
-      } else if (
-        owner === 'neutral' ||
-        (owner === 'red' && currentTurn !== 'Red') ||
-        (owner === 'blue' && currentTurn !== 'Blue')
-      ) {
-        console.log('swap');
-        this.swapTurn();
-      } else if (owner === 'red' && currentTurn === 'Red') {
+      newBoard[index] = newCell;
+
+      if (cellOwner === 'black') {
+        console.log(`${activeTurn} loses`);
+      } else if (cellOwner === 'red' && activeTurn === 'Red') {
         this.decrementRed();
-      } else if (owner === 'blue' && currentTurn === 'Blue') {
+      } else if (cellOwner === 'blue' && activeTurn === 'Blue') {
         this.decrementBlue();
       }
+
+      this.updateGame({ board: newBoard, swapTurn });
     },
   },
 };
