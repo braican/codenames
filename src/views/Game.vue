@@ -2,28 +2,28 @@
   <div class="game">
     <p class="game-label">Game - {{ $route.params.gameId }}</p>
 
-    <div v-if="game.board">
+    <div v-if="game">
       <header class="meta">
         <div class="score">
-          <span class="red-team">{{ game.redScore }}</span> &mdash;
-          <span class="blue-team">{{ game.blueScore }}</span>
+          <span class="red-team">{{ redScore }}</span> &mdash;
+          <span class="blue-team">{{ blueScore }}</span>
         </div>
 
-        <div :class="['turn', game.turn === 'Red' ? 'red-team' : 'blue-team']">
-          Turn: {{ game.turn }}
-        </div>
+        <div :class="['turn', turn === 'Red' ? 'red-team' : 'blue-team']">Turn: {{ turn }}</div>
 
         <div class="turn-trigger">
           <button
             type="button"
-            :class="['button', game.turn === 'Red' ? 'button--red-team' : 'button--blue-team']"
+            :class="['button', turn === 'Red' ? 'button--red-team' : 'button--blue-team']"
           >
-            End {{ game.turn }}'s turn
+            End {{ turn }}'s turn
           </button>
         </div>
       </header>
 
-      <Gameboard :board="game.board" :game="$route.params.gameId" />
+      <button @click="reset">Reset</button>
+
+      <Gameboard />
     </div>
 
     <div v-else class="loading">
@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { gamesCollection } from '@/firebase';
 import Gameboard from '@/components/Gameboard';
 
@@ -41,12 +41,23 @@ export default {
   name: 'Game',
   components: { Gameboard },
   computed: {
-    ...mapState(['game']),
+    ...mapState(['game', 'turn', 'redScore', 'blueScore']),
+  },
+  methods: {
+    ...mapActions(['updateGameboard']),
+    reset() {
+      if (!this.game) {
+        return;
+      }
+
+      const cleanGameboard = this.game.board.map(c => ({ ...c, hidden: true }));
+      this.updateGameboard(cleanGameboard);
+    },
   },
   mounted() {
     this.$store.commit('setGameId', this.$route.params.gameId);
 
-    if (!this.game.board) {
+    if (!this.game) {
       this.$store.dispatch('bindGameboard', this.$route.params.gameId);
     }
   },

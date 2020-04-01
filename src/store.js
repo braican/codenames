@@ -9,12 +9,10 @@ const store = new Vuex.Store({
   state: {
     currentUser: null,
     gameId: null,
-    game: {
-      board: null,
-      turn: null,
-      redScore: 0,
-      blueScore: 0,
-    },
+    game: null,
+    turn: null,
+    redScore: 0,
+    blueScore: 0,
   },
   mutations: {
     ...vuexfireMutations,
@@ -25,11 +23,8 @@ const store = new Vuex.Store({
     setGameId(state, val) {
       state.gameId = val;
     },
-    setGame(state, val) {
-      state.game = val;
-    },
     setGameboard(state, val) {
-      state.game = { ...state.game, board: val };
+      state.game = { board: val };
     },
     setTurn(state, val) {
       state.turn = val;
@@ -42,19 +37,22 @@ const store = new Vuex.Store({
     },
   },
   actions: {
-    setupNewGame({ commit, dispatch }, board) {
+    decrementRed({ state, commit }) {
+      commit('setRedScore', state.redScore - 1);
+    },
+    decrementBlue({ state, commit }) {
+      commit('setBlueScore', state.blueScore - 1);
+    },
+    swapTurn({ state, commit }) {
+      commit('setTurn', state.turn === 'Red' ? 'Blue' : 'Red');
+    },
+    setupNewGame({ commit }, board) {
       return gamesCollection.add({ board }).then(docRef => {
         console.log(`Created game with ID of ${docRef.id}`);
         commit('setGameId', docRef.id);
-        dispatch('setupGameboard', board);
+        commit('setGameboard', board);
         return docRef.id;
       });
-    },
-    setupGameboard({ commit }, board) {
-      const redScore = board.filter(c => c.owner === 'red').length;
-      const blueScore = board.filter(c => c.owner === 'blue').length;
-      const turn = redScore > blueScore ? 'Red' : 'Blue';
-      commit('setGame', { board, turn, redScore, blueScore });
     },
     updateGameboard({ commit, state }, board) {
       commit('setGameboard', board);
@@ -63,8 +61,18 @@ const store = new Vuex.Store({
         .set({ board })
         .catch(error => console.error(error));
     },
-    bindGameboard: firestoreAction(({ bindFirestoreRef }, gameId) => {
-      return bindFirestoreRef('game', gamesCollection.doc(gameId));
+    updateGame({ commit }, board) {
+      const redScore = board.filter(c => c.owner === 'red').length;
+      const blueScore = board.filter(c => c.owner === 'blue').length;
+      const turn = redScore > blueScore ? 'Red' : 'Blue';
+      commit('setTurn', turn);
+      commit('setRedScore', redScore);
+      commit('setBlueScore', blueScore);
+    },
+    bindGameboard: firestoreAction(({ bindFirestoreRef, dispatch }, gameId) => {
+      return bindFirestoreRef('game', gamesCollection.doc(gameId)).then(({ board }) => {
+        dispatch('updateGame', board);
+      });
     }),
   },
 });

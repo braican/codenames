@@ -2,7 +2,7 @@
   <div class="gameboard">
     <button
       :class="['cell', getCellClass(cell)]"
-      v-for="(cell, index) in board"
+      v-for="(cell, index) in game.board"
       :key="cell.word"
       @click="() => handleCellClick(cell, index)"
     >
@@ -14,24 +14,15 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 
 export default {
   name: 'Gameboard',
-  props: {
-    board: {
-      type: Array,
-      required: true,
-    },
-    game: {
-      type: String,
-      required: true,
-    },
-  },
   computed: {
-    ...mapState(['turn']),
+    ...mapState(['game', 'gameId', 'turn']),
   },
   methods: {
+    ...mapActions(['decrementRed', 'decrementBlue', 'swapTurn', 'updateGameboard']),
     getCellClass(cell) {
       if (cell.hidden) {
         return;
@@ -50,14 +41,27 @@ export default {
       return null;
     },
     handleCellClick(cell, index) {
-      const newCell = { ...cell };
-      const newBoard = [...this.board];
+      const newCell = { ...cell, hidden: false };
+      const newBoard = [...this.game.board];
       const owner = cell.owner;
-      newCell.hidden = false;
-
+      const currentTurn = this.turn;
       newBoard[index] = newCell;
+      this.updateGameboard(newBoard);
 
-      this.$store.dispatch('updateGameboard', newBoard);
+      if (owner === 'black') {
+        console.log(`${currentTurn} loses`);
+      } else if (
+        owner === 'neutral' ||
+        (owner === 'red' && currentTurn !== 'Red') ||
+        (owner === 'blue' && currentTurn !== 'Blue')
+      ) {
+        console.log('swap');
+        this.swapTurn();
+      } else if (owner === 'red' && currentTurn === 'Red') {
+        this.decrementRed();
+      } else if (owner === 'blue' && currentTurn === 'Blue') {
+        this.decrementBlue();
+      }
     },
   },
 };
@@ -100,6 +104,11 @@ export default {
 
   &--neutral {
     background-color: $c--gray-c;
+  }
+
+  &--black {
+    background-color: $c--black;
+    color: $c--white;
   }
 }
 </style>
