@@ -45,7 +45,7 @@ export default {
       return null;
     },
     handleCellClick(cell, index) {
-      if (this.locked) {
+      if (this.locked || cell.hidden === false) {
         return;
       }
 
@@ -62,9 +62,9 @@ export default {
 
       if (cellOwner === 'black') {
         this.setWinner(activeTurn === 'Red' ? 'Blue' : 'Red');
-      } else if (cellOwner === 'red' && activeTurn === 'Red') {
+      } else if (cellOwner === 'red') {
         this.decrementRed();
-      } else if (cellOwner === 'blue' && activeTurn === 'Blue') {
+      } else if (cellOwner === 'blue') {
         this.decrementBlue();
       }
 

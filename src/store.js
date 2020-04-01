@@ -46,9 +46,11 @@ const store = new Vuex.Store({
     },
     setWinner(state, val) {
       state.winner = val;
-      state.locked = true;
+      if (val !== null) {
+        state.locked = true;
+      }
     },
-    unlockBoard(state, val) {
+    unlockBoard(state) {
       state.locked = false;
     },
   },
@@ -95,8 +97,8 @@ const store = new Vuex.Store({
         throw new Error('There was a problem getting the gameboard.');
       }
 
-      commit('unlockBoard');
       commit('setWinner', null);
+      commit('unlockBoard');
 
       const gameData = await dispatch('setupGame', { board });
 
