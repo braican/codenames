@@ -1,14 +1,16 @@
 <template>
-  <div class="gameboard">
-    <button
-      :class="['cell', getCellClass(cell)]"
-      v-for="(cell, index) in board"
-      :key="cell.word"
-      @click="() => handleCellClick(cell, index)"
-      :disabled="locked"
-    >
-      {{ cell.word }}
-    </button>
+  <div class="gameboard-wrapper">
+    <div class="gameboard">
+      <button
+        :class="['cell', getCellClass(cell)]"
+        v-for="(cell, index) in board"
+        :key="cell.word"
+        @click="() => handleCellClick(cell, index)"
+        :disabled="locked"
+      >
+        {{ cell.word }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -85,27 +87,36 @@ export default {
 <style lang="scss" scoped>
 @import '@/static/styles/_abstracts.scss';
 
-.gameboard {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  grid-gap: 1rem;
-
-  @include mq($bp--desktop) {
-    grid-template-columns: repeat(5, 1fr);
+.gameboard-wrapper {
+  overflow: auto;
+  @include mq($bp--desktop, max) {
+    margin-left: -1rem;
+    margin-right: -1rem;
   }
+}
+.gameboard {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 20%);
 }
 
 .cell {
+  border: 0.25rem solid $c--white;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: $c--gray-e;
   height: 12vh;
-  min-height: 100px;
+  min-height: 3.5rem;
   padding: 1rem;
   font-weight: $fw--bold;
   text-transform: uppercase;
   letter-spacing: 0.1px;
+  font-size: 1.5vw;
+
+  @include mq($bp--desktop) {
+    font-size: 1rem;
+  }
 
   &--red {
     &.cell--spymaster {
@@ -128,13 +139,14 @@ export default {
     }
   }
 
-  &--neutral {
+  &--neutral.cell--selected {
     background-color: $c--gray-c;
   }
 
   &--black {
     &.cell--spymaster {
       color: $c--black;
+      background-color: rgba($c--black, 0.4);
     }
     &.cell--selected {
       background-color: $c--black;

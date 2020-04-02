@@ -14,7 +14,7 @@ export default {
 @import '@/static/styles/_abstracts.scss';
 
 .app {
-  padding: 2rem;
+  padding: 1rem;
   min-height: 100vh;
 
   @include mq($bp--desktop) {

@@ -105,6 +105,7 @@ const store = new Vuex.Store({
 
       commit('setWinner', null);
       commit('unlockBoard');
+      commit('setSpymaster', false);
 
       const gameData = await dispatch('setupGame', { board });
 
@@ -145,6 +146,8 @@ const store = new Vuex.Store({
         commit('setWinner', 'Red');
       } else if (blueScore < 1) {
         commit('setWinner', 'Blue');
+      } else if (board.filter(c => c.owner === 'black' && c.hidden === false).length === 1) {
+        commit('setWinner', 'Nobody');
       }
 
       return { board, turn, redScore, blueScore };
@@ -154,8 +157,6 @@ const store = new Vuex.Store({
       return bindFirestoreRef('game', gamesCollection.doc(gameId)).then(({ board, turn }) => {
         dispatch('setupGame', { board, turn });
         commit('setGameId', gameId);
-
-        console.log('tracking', gameId);
       });
     }),
   },

@@ -84,7 +84,7 @@ export default {
     ...mapState(['gameId', 'winner', 'spymaster']),
     ...mapGetters(['board', 'turn', 'redScore', 'blueScore']),
     gameUrl() {
-      return `https://braican.com/g/${this.$route.params.gameId}`;
+      return `https://codenames.braican.com/g/${this.$route.params.gameId}`;
     },
   },
   methods: {
@@ -97,7 +97,9 @@ export default {
 
     playAgain() {
       this.loading = true;
-      this.createNewBoard();
+      this.createNewBoard().then(() => {
+        this.loading = false;
+      });
     },
   },
   mounted() {
@@ -119,7 +121,7 @@ export default {
 
 .meta {
   position: relative;
-  margin-bottom: 2vh;
+  margin-bottom: 1rem;
   font-size: 1.5rem;
 
   @include mq($bp--small) {
@@ -189,8 +191,11 @@ export default {
 
 .footer {
   margin-top: 2rem;
-  display: flex;
-  align-items: center;
+
+  @include mq($bp--small) {
+    display: flex;
+    align-items: center;
+  }
 }
 
 .toggle {
