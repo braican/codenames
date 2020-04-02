@@ -1,7 +1,5 @@
 <template>
   <div class="game">
-    <p class="game-label">Game - {{ $route.params.gameId }}</p>
-
     <div v-if="board" class="game-wrapper">
       <header class="meta">
         <div class="score">
@@ -38,9 +36,29 @@
         </div>
       </header>
 
-      <button @click="reset">Reset</button>
-
       <Gameboard />
+
+      <div class="footer">
+        <div class="toggle">
+          <button
+            :class="spymaster === false ? 'toggle--active' : ''"
+            @click="() => setSpymaster(false)"
+          >
+            Player
+          </button>
+          <button
+            :class="spymaster === true ? 'toggle--active' : ''"
+            @click="() => setSpymaster(true)"
+          >
+            Spymaster
+          </button>
+        </div>
+
+        <p class="game-label">
+          <span>Game {{ this.$route.params.gameId }}</span>
+          <button class="copy-game-url" v-clipboard:copy="gameUrl">Copy game url</button>
+        </p>
+      </div>
     </div>
 
     <div v-else class="loading">
@@ -50,7 +68,7 @@
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapActions, mapGetters, mapMutations } from 'vuex';
 import { gamesCollection } from '@/firebase';
 import Gameboard from '@/components/Gameboard';
 
@@ -63,24 +81,15 @@ export default {
     };
   },
   computed: {
-    ...mapState(['redScore', 'blueScore', 'gameId', 'winner']),
-    ...mapGetters(['board', 'turn']),
+    ...mapState(['gameId', 'winner', 'spymaster']),
+    ...mapGetters(['board', 'turn', 'redScore', 'blueScore']),
+    gameUrl() {
+      return `https://braican.com/g/${this.$route.params.gameId}`;
+    },
   },
   methods: {
     ...mapActions(['updateGame', 'createNewBoard']),
-
-    // @TODO: remove
-    reset() {
-      if (!this.board) {
-        return;
-      }
-
-      const cleanGameboard = this.board.map(c => ({ ...c, hidden: true }));
-      const redScore = cleanGameboard.filter(c => c.owner === 'red').length;
-      const blueScore = cleanGameboard.filter(c => c.owner === 'blue').length;
-      const turn = redScore > blueScore ? 'Red' : 'Blue';
-      this.updateGame({ board: cleanGameboard, swapTurn: this.turn !== turn });
-    },
+    ...mapMutations(['setSpymaster']),
 
     swapTurns() {
       this.updateGame({ board: this.board, swapTurn: true });
@@ -92,9 +101,7 @@ export default {
     },
   },
   mounted() {
-    if (!this.gameId) {
-      this.$store.dispatch('bindGameboard', this.$route.params.gameId);
-    }
+    this.$store.dispatch('bindGameboard', this.$route.params.gameId);
   },
 };
 </script>
@@ -110,23 +117,42 @@ export default {
   position: relative;
 }
 
-.game-label {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-}
-
 .meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: relative;
   margin-bottom: 2vh;
   font-size: 1.5rem;
+
+  @include mq($bp--small) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.postgame-actions {
+  text-align: right;
+  width: 120px;
+}
+
+.score {
+  @include mq($bp--small, max) {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
 }
 
 .turn {
-  margin-left: 1rem;
-  margin-right: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  font-weight: $fw--bold;
+
+  @include mq($bp--small) {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
 }
 
 .red-team {
@@ -161,8 +187,42 @@ export default {
   }
 }
 
-.postgame-actions {
-  text-align: right;
-  width: 120px;
+.footer {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.toggle {
+  margin-right: 2rem;
+
+  button {
+    display: inline-block;
+    padding: 0.5em;
+    background-color: $c--gray-e;
+    opacity: 0.4;
+    color: $c--gray-3;
+
+    + button {
+      margin-left: 6px;
+    }
+
+    &.toggle--active {
+      color: $c--black;
+      opacity: 1;
+    }
+  }
+}
+
+.game-label {
+  display: flex;
+  align-items: center;
+}
+
+.copy-game-url {
+  display: inline-block;
+  background-color: $c--gray-e;
+  margin-left: 2rem;
+  padding: 0.5em 0.7em;
 }
 </style>

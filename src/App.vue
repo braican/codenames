@@ -1,24 +1,26 @@
 <template>
   <div id="app" class="app">
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
 <script>
-
 export default {
   name: 'App',
-}
+};
 </script>
 
 <style lang="scss" scoped>
 @import '@/static/styles/_abstracts.scss';
 
 .app {
-  padding: 4vw;
-  display: flex;
+  padding: 2rem;
   min-height: 100vh;
-  align-items: center;
-}
 
+  @include mq($bp--desktop) {
+    display: flex;
+    align-items: center;
+    padding: 4vw;
+  }
+}
 </style>

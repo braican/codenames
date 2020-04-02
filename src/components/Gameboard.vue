@@ -8,8 +8,6 @@
       :disabled="locked"
     >
       {{ cell.word }}
-      <br />
-      {{ cell.owner }}
     </button>
   </div>
 </template>
@@ -20,7 +18,7 @@ import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 export default {
   name: 'Gameboard',
   computed: {
-    ...mapState(['locked']),
+    ...mapState(['locked', 'spymaster']),
     ...mapGetters(['board', 'turn']),
   },
   methods: {
@@ -28,21 +26,31 @@ export default {
     ...mapMutations(['setWinner']),
 
     getCellClass(cell) {
-      if (cell.hidden) {
+      if (cell.hidden && !this.spymaster) {
         return;
       }
 
-      if (cell.owner === 'neutral') {
-        return 'cell--neutral';
-      } else if (cell.owner === 'red') {
-        return 'cell--red';
-      } else if (cell.owner === 'blue') {
-        return 'cell--blue';
-      } else if (cell.owner === 'black') {
-        return 'cell--black';
+      const classes = [];
+
+      if (cell.hidden === false) {
+        classes.push('cell--selected');
       }
 
-      return null;
+      if (this.spymaster) {
+        classes.push('cell--spymaster');
+      }
+
+      if (cell.owner === 'neutral') {
+        classes.push('cell--neutral');
+      } else if (cell.owner === 'red') {
+        classes.push('cell--red');
+      } else if (cell.owner === 'blue') {
+        classes.push('cell--blue');
+      } else if (cell.owner === 'black') {
+        classes.push('cell--black');
+      }
+
+      return classes.join(' ');
     },
     handleCellClick(cell, index) {
       if (this.locked || cell.hidden === false) {
@@ -79,7 +87,7 @@ export default {
 
 .gameboard {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   grid-gap: 1rem;
 
   @include mq($bp--desktop) {
@@ -100,13 +108,24 @@ export default {
   letter-spacing: 0.1px;
 
   &--red {
-    background-color: $c--red;
-    color: $c--white;
+    &.cell--spymaster {
+      color: $c--red;
+    }
+    &.cell--selected {
+      background-color: $c--red;
+      color: $c--white;
+    }
   }
 
   &--blue {
-    background-color: $c--blue;
-    color: $c--white;
+    &.cell--spymaster {
+      color: $c--blue;
+    }
+
+    &.cell--selected {
+      background-color: $c--blue;
+      color: $c--white;
+    }
   }
 
   &--neutral {
@@ -114,8 +133,13 @@ export default {
   }
 
   &--black {
-    background-color: $c--black;
-    color: $c--white;
+    &.cell--spymaster {
+      color: $c--black;
+    }
+    &.cell--selected {
+      background-color: $c--black;
+      color: $c--white;
+    }
   }
 }
 </style>

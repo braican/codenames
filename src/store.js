@@ -13,15 +13,18 @@ const store = new Vuex.Store({
     game: {
       board: null,
       turn: null,
+      redScore: 0,
+      blueScore: 0,
     },
     winner: null,
-    redScore: 0,
-    blueScore: 0,
     locked: false,
+    spymaster: false,
   },
   getters: {
     board: state => state.game.board,
     turn: state => state.game.turn,
+    redScore: state => state.game.redScore,
+    blueScore: state => state.game.blueScore,
   },
   mutations: {
     ...vuexfireMutations,
@@ -39,10 +42,10 @@ const store = new Vuex.Store({
       state.game.turn = val;
     },
     setRedScore(state, val) {
-      state.redScore = val;
+      state.game.redScore = val;
     },
     setBlueScore(state, val) {
-      state.blueScore = val;
+      state.game.blueScore = val;
     },
     setWinner(state, val) {
       state.winner = val;
@@ -53,17 +56,20 @@ const store = new Vuex.Store({
     unlockBoard(state) {
       state.locked = false;
     },
+    setSpymaster(state, val) {
+      state.spymaster = val;
+    },
   },
   actions: {
     decrementRed({ state, commit }) {
-      const newScore = state.redScore - 1;
+      const newScore = state.game.redScore - 1;
       commit('setRedScore', newScore);
       if (newScore < 1) {
         commit('setWinner', 'Red');
       }
     },
     decrementBlue({ state, commit }) {
-      const newScore = state.blueScore - 1;
+      const newScore = state.game.blueScore - 1;
       commit('setBlueScore', newScore);
       if (newScore < 1) {
         commit('setWinner', 'Blue');
@@ -106,7 +112,7 @@ const store = new Vuex.Store({
     },
 
     updateGame({ commit, state }, { board, swapTurn }) {
-      const gameData = { board };
+      const gameData = { board, redScore: state.game.redScore, blueScore: state.game.blueScore };
 
       commit('setGameboard', board);
 
@@ -141,13 +147,15 @@ const store = new Vuex.Store({
         commit('setWinner', 'Blue');
       }
 
-      return { board, turn };
+      return { board, turn, redScore, blueScore };
     },
 
     bindGameboard: firestoreAction(({ bindFirestoreRef, dispatch, commit }, gameId) => {
       return bindFirestoreRef('game', gamesCollection.doc(gameId)).then(({ board, turn }) => {
         dispatch('setupGame', { board, turn });
         commit('setGameId', gameId);
+
+        console.log('tracking', gameId);
       });
     }),
   },
