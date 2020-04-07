@@ -11,6 +11,7 @@ const store = new Vuex.Store({
     currentUser: null,
     gameId: null,
     game: {
+      boardId: null,
       board: null,
       turn: null,
       redScore: 0,
@@ -66,7 +67,7 @@ const store = new Vuex.Store({
       });
     },
 
-    async createNewBoard({ commit, state, dispatch }) {
+    async createNewBoard({ state, dispatch }) {
       if (!state.gameId) {
         return dispatch('createNewGame');
       }
@@ -96,7 +97,14 @@ const store = new Vuex.Store({
       const redScore = board.filter(c => c.owner === 'red' && c.hidden).length;
       const blueScore = board.filter(c => c.owner === 'blue' && c.hidden).length;
       const turn = redScore > blueScore ? 'Red' : 'Blue';
-      const gameData = { board, turn, redScore, blueScore, winner: null };
+      const gameData = {
+        boardId: Date.now() + board[0].word,
+        board,
+        turn,
+        redScore,
+        blueScore,
+        winner: null,
+      };
 
       commit('setGame', gameData);
       return gameData;
@@ -113,6 +121,14 @@ const store = new Vuex.Store({
     }),
   },
 });
+
+store.watch(
+  state => state.game.boardId,
+  () => {
+    store.commit('unlockBoard');
+    store.commit('setSpymaster', false);
+  },
+);
 
 auth.onAuthStateChanged(user => {
   if (!user) {
