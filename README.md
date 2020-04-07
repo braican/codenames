@@ -1,36 +1,27 @@
-# Vue / Firebase Starter
+# Codenames
 
-## Comes with
 
-* Vue
-* Vuex
-* Vue Router
-* Firebase
+Play Codeames online at https://codenames.braican.com/.
+
+A Vue implementation of Codenames, a game where two teams take turns trying to get their teammates to correctly pick their secret words.
 
 ## Project setup
+
 ```
 yarn install
 ```
 
-### Compiles and hot-reloads for development
+## Start development
 ```
-yarn run serve
-```
-
-### Compiles and minifies for production
-```
-yarn run build
+yarn start
 ```
 
-### Run your tests
+## Build for production
+
 ```
-yarn run test
+yarn build
 ```
 
-### Lints and fixes files
-```
-yarn run lint
-```
+## Configuration
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+This repo is built off of the Vue CLI tool. See [Configuration Reference](https://cli.vuejs.org/config/) for documentation on available configuration options.

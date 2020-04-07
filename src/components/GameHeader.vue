@@ -39,7 +39,7 @@ export default {
   methods: {
     ...mapActions(['updateGame', 'createNewBoard']),
     swapTurns() {
-      this.updateGame({ swapTurn: true });
+      this.updateGame({ turn: this.turn === 'Red' ? 'Blue' : 'Red' });
     },
   },
 };
