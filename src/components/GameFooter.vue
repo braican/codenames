@@ -35,5 +35,13 @@ export default {
 
 .new-game-trigger {
   margin-left: auto;
+
+  @include mq($bp--small, max) {
+    margin-top: 2rem;
+
+    .button {
+      width: 100%;
+    }
+  }
 }
 </style>

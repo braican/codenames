@@ -1,8 +1,6 @@
 <template>
   <div class="lets-go">
-    <button :class="['button', { 'is-hidden': loading || error }]" @click="startGame">
-      Start a game
-    </button>
+    <button :class="['button', { 'is-hidden': loading || error }]" @click="startGame">Start a game</button>
     <p class="loading" v-if="loading">Loading...</p>
     <p class="error" v-if="error">There was an error setting up the game.</p>
   </div>
@@ -48,7 +46,11 @@ export default {
 }
 
 .button {
-  font-size: 2rem;
+  font-size: 1.4rem;
+
+  @include mq($bp--tablet) {
+    font-size: 1.8rem;
+  }
 
   &.is-hidden {
     visibility: hidden;

@@ -121,11 +121,11 @@ export default {
   background-color: $c--gray-e;
   height: 12vh;
   min-height: 3.5rem;
-  padding: 1rem;
+  padding: 0.8rem;
   font-weight: $fw--bold;
   text-transform: uppercase;
   letter-spacing: 0.1px;
-  font-size: 1.5vw;
+  font-size: 2vw;
 
   &:focus {
     outline: 1px solid #ccc;
