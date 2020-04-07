@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import GameHeader from '@/components/GameHeader';
 import Gameboard from '@/components/Gameboard';
 import GameFooter from '@/components/GameFooter';
@@ -43,18 +43,8 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['createNewBoard']),
-
-    playAgain() {
-      this.loading = true;
-      this.createNewBoard().then(() => {
-        this.loading = false;
-      });
-    },
-
     copy() {
       this.copied = true;
-
       setTimeout(() => (this.copied = false), 5000);
     },
   },

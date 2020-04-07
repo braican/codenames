@@ -3,16 +3,21 @@
     <Toggle />
 
     <p class="new-game-trigger">
-      <button class="button">New Game</button>
+      <button class="button" @click="createNewBoard">New Game</button>
     </p>
   </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import Toggle from '@/components/Toggle';
+
 export default {
   name: 'GameFooter',
   components: { Toggle },
+  methods: {
+    ...mapActions(['createNewBoard']),
+  },
 };
 </script>
 

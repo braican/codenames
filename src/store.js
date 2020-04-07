@@ -23,11 +23,7 @@ const store = new Vuex.Store({
   getters: {
     board: state => state.game.board,
     turn: state => state.game.turn,
-    redScore: state => {
-      console.log(state.game);
-
-      return state.game.redScore;
-    },
+    redScore: state => state.game.redScore,
     blueScore: state => state.game.blueScore,
     winner: state => state.game.winner,
   },
@@ -42,6 +38,9 @@ const store = new Vuex.Store({
     },
     setGame(state, val) {
       state.game = val;
+    },
+    lockBoard(state) {
+      state.locked = true;
     },
     unlockBoard(state) {
       state.locked = false;
@@ -58,7 +57,7 @@ const store = new Vuex.Store({
         throw new Error('There was a problem getting the gameboard.');
       }
 
-      const gameData = await dispatch('setupGame', { board });
+      const gameData = await dispatch('setupGame', board);
 
       return gamesCollection.add(gameData).then(docRef => {
         console.log(`Created game with ID of ${docRef.id}`);
@@ -78,12 +77,7 @@ const store = new Vuex.Store({
         throw new Error('There was a problem getting the gameboard.');
       }
 
-      commit('setWinner', null);
-      commit('unlockBoard');
-      commit('setSpymaster', false);
-
-      const gameData = await dispatch('setupGame', { board });
-
+      const gameData = await dispatch('setupGame', board);
       return gamesCollection.doc(state.gameId).set(gameData);
     },
 
@@ -98,36 +92,23 @@ const store = new Vuex.Store({
         .catch(error => console.error(error));
     },
 
-    setupGame({ commit }, { board, turn }) {
-      // const redScore = board.filter(c => c.owner === 'red' && c.hidden).length;
-      // const blueScore = board.filter(c => c.owner === 'blue' && c.hidden).length;
+    setupGame({ commit }, board) {
+      const redScore = board.filter(c => c.owner === 'red' && c.hidden).length;
+      const blueScore = board.filter(c => c.owner === 'blue' && c.hidden).length;
+      const turn = redScore > blueScore ? 'Red' : 'Blue';
+      const gameData = { board, turn, redScore, blueScore, winner: null };
 
-      // if (turn === undefined) {
-      //   turn = redScore > blueScore ? 'Red' : 'Blue';
-      // }
-
-      // commit('setGameboard', board);
-      // commit('setRedScore', redScore);
-      // commit('setBlueScore', blueScore);
-      // commit('setTurn', turn);
-
-      // if (redScore < 1) {
-      //   commit('setWinner', 'Red');
-      // } else if (blueScore < 1) {
-      //   commit('setWinner', 'Blue');
-      // } else if (board.filter(c => c.owner === 'black' && c.hidden === false).length === 1) {
-      //   commit('setWinner', 'Nobody');
-      // }
-
-      return {};
-
-      // return { board, turn, redScore, blueScore, winner: null };
+      commit('setGame', gameData);
+      return gameData;
     },
 
-    bindGameboard: firestoreAction(({ bindFirestoreRef, dispatch, commit }, gameId) => {
-      return bindFirestoreRef('game', gamesCollection.doc(gameId)).then(({ board, turn }) => {
-        dispatch('setupGame', { board, turn });
+    bindGameboard: firestoreAction(({ bindFirestoreRef, commit }, gameId) => {
+      return bindFirestoreRef('game', gamesCollection.doc(gameId)).then(gameData => {
+        commit('setGame', gameData);
         commit('setGameId', gameId);
+        if (gameData.winner) {
+          commit('lockBoard');
+        }
       });
     }),
   },

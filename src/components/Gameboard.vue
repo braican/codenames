@@ -23,7 +23,7 @@ export default {
   },
   methods: {
     ...mapActions(['updateGame']),
-    ...mapMutations(['setWinner']),
+    ...mapMutations(['lockBoard']),
 
     getCellClass(cell) {
       if (cell.hidden && !this.spymaster) {
@@ -76,10 +76,21 @@ export default {
 
       if (cellOwner === 'black') {
         newGameData.winner = turn === 'Red' ? 'Blue' : 'Red';
+        this.lockBoard();
       } else if (cellOwner === 'red') {
-        newGameData.redScore = redScore - 1;
+        const newRedScore = redScore - 1;
+        newGameData.redScore = newRedScore;
+        if (newRedScore < 1) {
+          newGameData.winner = 'Red';
+          this.lockBoard();
+        }
       } else if (cellOwner === 'blue') {
-        newGameData.blueScore = blueScore - 1;
+        const newBlueScore = blueScore - 1;
+        newGameData.blueScore = newBlueScore;
+        if (newBlueScore < 1) {
+          newGameData.winner = 'Blue';
+          this.lockBoard();
+        }
       }
 
       this.updateGame(newGameData);

@@ -22,9 +22,7 @@
       <p :class="['winner-status', `winner-status--${winner.toLowerCase()}`]">{{ winner }} team wins</p>
 
       <div class="postgame-actions">
-        <button v-if="!loading" class="button play-again-btn" @click="playAgain">Play again</button>
-
-        <p v-else>Loading...</p>
+        <button class="button play-again-btn" @click="createNewBoard">Play again</button>
       </div>
     </div>
   </header>
@@ -39,7 +37,7 @@ export default {
     ...mapGetters(['turn', 'redScore', 'blueScore', 'winner']),
   },
   methods: {
-    ...mapActions(['updateGame']),
+    ...mapActions(['updateGame', 'createNewBoard']),
     swapTurns() {
       this.updateGame({ swapTurn: true });
     },
@@ -93,11 +91,10 @@ export default {
 .winner {
   display: flex;
   align-items: center;
-  height: 60px;
 }
 
 .winner-status {
-  font-size: 2rem;
+  font-size: 1.6rem;
   margin-right: 2rem;
   font-weight: $fw--bold;
 
