@@ -71,6 +71,12 @@ button {
   }
 }
 
+.button--secondary {
+  display: inline-block;
+  background-color: $c--gray-e;
+  padding: 0.5em;
+}
+
 // Headers
 // -----------
 

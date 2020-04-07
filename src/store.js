@@ -15,16 +15,21 @@ const store = new Vuex.Store({
       turn: null,
       redScore: 0,
       blueScore: 0,
+      winner: null,
     },
-    winner: null,
     locked: false,
     spymaster: false,
   },
   getters: {
     board: state => state.game.board,
     turn: state => state.game.turn,
-    redScore: state => state.game.redScore,
+    redScore: state => {
+      console.log(state.game);
+
+      return state.game.redScore;
+    },
     blueScore: state => state.game.blueScore,
+    winner: state => state.game.winner,
   },
   mutations: {
     ...vuexfireMutations,
@@ -35,23 +40,8 @@ const store = new Vuex.Store({
     setGameId(state, val) {
       state.gameId = val;
     },
-    setGameboard(state, val) {
-      state.game.board = val;
-    },
-    setTurn(state, val) {
-      state.game.turn = val;
-    },
-    setRedScore(state, val) {
-      state.game.redScore = val;
-    },
-    setBlueScore(state, val) {
-      state.game.blueScore = val;
-    },
-    setWinner(state, val) {
-      state.winner = val;
-      if (val !== null) {
-        state.locked = true;
-      }
+    setGame(state, val) {
+      state.game = val;
     },
     unlockBoard(state) {
       state.locked = false;
@@ -61,21 +51,6 @@ const store = new Vuex.Store({
     },
   },
   actions: {
-    decrementRed({ state, commit }) {
-      const newScore = state.game.redScore - 1;
-      commit('setRedScore', newScore);
-      if (newScore < 1) {
-        commit('setWinner', 'Red');
-      }
-    },
-    decrementBlue({ state, commit }) {
-      const newScore = state.game.blueScore - 1;
-      commit('setBlueScore', newScore);
-      if (newScore < 1) {
-        commit('setWinner', 'Blue');
-      }
-    },
-
     async createNewGame({ commit, dispatch }) {
       const board = await getGameboard();
 
@@ -112,45 +87,41 @@ const store = new Vuex.Store({
       return gamesCollection.doc(state.gameId).set(gameData);
     },
 
-    updateGame({ commit, state }, { board, swapTurn }) {
-      const gameData = { board, redScore: state.game.redScore, blueScore: state.game.blueScore };
+    updateGame({ commit, state }, newGameData) {
+      const updatedGame = { ...state.game, ...newGameData };
 
-      commit('setGameboard', board);
-
-      if (swapTurn) {
-        const newTurn = state.game.turn === 'Red' ? 'Blue' : 'Red';
-        gameData.turn = newTurn;
-        commit('setTurn', newTurn);
-      }
+      commit('setGame', updatedGame);
 
       gamesCollection
         .doc(state.gameId)
-        .set(gameData, { merge: true })
+        .set(updatedGame, { merge: true })
         .catch(error => console.error(error));
     },
 
     setupGame({ commit }, { board, turn }) {
-      const redScore = board.filter(c => c.owner === 'red' && c.hidden).length;
-      const blueScore = board.filter(c => c.owner === 'blue' && c.hidden).length;
+      // const redScore = board.filter(c => c.owner === 'red' && c.hidden).length;
+      // const blueScore = board.filter(c => c.owner === 'blue' && c.hidden).length;
 
-      if (turn === undefined) {
-        turn = redScore > blueScore ? 'Red' : 'Blue';
-      }
+      // if (turn === undefined) {
+      //   turn = redScore > blueScore ? 'Red' : 'Blue';
+      // }
 
-      commit('setGameboard', board);
-      commit('setRedScore', redScore);
-      commit('setBlueScore', blueScore);
-      commit('setTurn', turn);
+      // commit('setGameboard', board);
+      // commit('setRedScore', redScore);
+      // commit('setBlueScore', blueScore);
+      // commit('setTurn', turn);
 
-      if (redScore < 1) {
-        commit('setWinner', 'Red');
-      } else if (blueScore < 1) {
-        commit('setWinner', 'Blue');
-      } else if (board.filter(c => c.owner === 'black' && c.hidden === false).length === 1) {
-        commit('setWinner', 'Nobody');
-      }
+      // if (redScore < 1) {
+      //   commit('setWinner', 'Red');
+      // } else if (blueScore < 1) {
+      //   commit('setWinner', 'Blue');
+      // } else if (board.filter(c => c.owner === 'black' && c.hidden === false).length === 1) {
+      //   commit('setWinner', 'Nobody');
+      // }
 
-      return { board, turn, redScore, blueScore };
+      return {};
+
+      // return { board, turn, redScore, blueScore, winner: null };
     },
 
     bindGameboard: firestoreAction(({ bindFirestoreRef, dispatch, commit }, gameId) => {

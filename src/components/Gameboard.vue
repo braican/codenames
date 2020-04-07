@@ -7,9 +7,7 @@
         :key="cell.word"
         @click="() => handleCellClick(cell, index)"
         :disabled="locked"
-      >
-        {{ cell.word }}
-      </button>
+      >{{ cell.word }}</button>
     </div>
   </div>
 </template>
@@ -20,11 +18,11 @@ import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 export default {
   name: 'Gameboard',
   computed: {
-    ...mapState(['locked', 'spymaster']),
-    ...mapGetters(['board', 'turn']),
+    ...mapState(['locked', 'spymaster', 'game']),
+    ...mapGetters(['board']),
   },
   methods: {
-    ...mapActions(['decrementRed', 'decrementBlue', 'updateGame']),
+    ...mapActions(['updateGame']),
     ...mapMutations(['setWinner']),
 
     getCellClass(cell) {
@@ -60,25 +58,31 @@ export default {
       }
 
       const newCell = { ...cell, hidden: false };
+      const { turn, redScore, blueScore } = this.game;
       const newBoard = [...this.board];
       const cellOwner = cell.owner;
-      const activeTurn = this.turn;
       const swapTurn =
         cellOwner === 'neutral' ||
-        (cellOwner === 'red' && activeTurn !== 'Red') ||
-        (cellOwner === 'blue' && activeTurn !== 'Blue');
+        (cellOwner === 'red' && turn !== 'Red') ||
+        (cellOwner === 'blue' && turn !== 'Blue');
 
       newBoard[index] = newCell;
 
-      if (cellOwner === 'black') {
-        this.setWinner(activeTurn === 'Red' ? 'Blue' : 'Red');
-      } else if (cellOwner === 'red') {
-        this.decrementRed();
-      } else if (cellOwner === 'blue') {
-        this.decrementBlue();
+      const newGameData = { board: newBoard };
+
+      if (swapTurn) {
+        newGameData.turn = turn === 'Red' ? 'Blue' : 'Red';
       }
 
-      this.updateGame({ board: newBoard, swapTurn });
+      if (cellOwner === 'black') {
+        newGameData.winner = turn === 'Red' ? 'Blue' : 'Red';
+      } else if (cellOwner === 'red') {
+        newGameData.redScore = redScore - 1;
+      } else if (cellOwner === 'blue') {
+        newGameData.blueScore = blueScore - 1;
+      }
+
+      this.updateGame(newGameData);
     },
   },
 };
@@ -88,20 +92,18 @@ export default {
 @import '@/static/styles/_abstracts.scss';
 
 .gameboard-wrapper {
-  overflow: auto;
   @include mq($bp--desktop, max) {
     margin-left: -1rem;
     margin-right: -1rem;
   }
 }
 .gameboard {
-  width: 100%;
   display: grid;
-  grid-template-columns: repeat(5, 20%);
+  grid-gap: 10px;
+  grid-template-columns: repeat(5, 1fr);
 }
 
 .cell {
-  border: 0.25rem solid $c--white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,6 +115,10 @@ export default {
   text-transform: uppercase;
   letter-spacing: 0.1px;
   font-size: 1.5vw;
+
+  &:focus {
+    outline: 1px solid #ccc;
+  }
 
   @include mq($bp--desktop) {
     font-size: 1rem;
