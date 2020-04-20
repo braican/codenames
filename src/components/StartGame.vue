@@ -30,7 +30,7 @@ export default {
           this.error = true;
         })
         .then(gameId => {
-          this.$router.push(`/g/${gameId}`);
+          this.$router.push(`/${gameId}`);
         });
     },
   },

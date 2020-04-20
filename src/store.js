@@ -112,6 +112,11 @@ const store = new Vuex.Store({
 
     bindGameboard: firestoreAction(({ bindFirestoreRef, commit }, gameId) => {
       return bindFirestoreRef('game', gamesCollection.doc(gameId)).then(gameData => {
+        if (gameData === null) {
+          commit('setGameId', false);
+          return;
+        }
+
         commit('setGame', gameData);
         commit('setGameId', gameId);
         if (gameData.winner) {
@@ -123,7 +128,7 @@ const store = new Vuex.Store({
 });
 
 store.watch(
-  state => state.game.boardId,
+  state => (state.game ? state.game.boardId : null),
   () => {
     store.commit('unlockBoard');
     store.commit('setSpymaster', false);

@@ -1,6 +1,9 @@
 <template>
   <div class="game">
-    <div v-if="gameId" class="game-wrapper">
+    <div v-if="gameId === false" class>
+      <p>Invalid game ID.</p>
+    </div>
+    <div v-else-if="gameId" class="game-wrapper">
       <GameHeader />
       <Gameboard />
       <GameFooter />
