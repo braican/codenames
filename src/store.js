@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { vuexfireMutations, firestoreAction } from 'vuexfire';
 import { auth, gamesCollection } from '@/firebase';
+import router from '@/router';
 import { getGameboard } from '@/utils';
 
 Vue.use(Vuex);
@@ -22,11 +23,11 @@ const store = new Vuex.Store({
     spymaster: false,
   },
   getters: {
-    board: state => state.game.board,
-    turn: state => state.game.turn,
-    redScore: state => state.game.redScore,
-    blueScore: state => state.game.blueScore,
-    winner: state => state.game.winner,
+    board: state => (state.game ? state.game.board : null),
+    turn: state => (state.game ? state.game.turn : null),
+    redScore: state => (state.game ? state.game.redScore : null),
+    blueScore: state => (state.game ? state.game.blueScore : null),
+    winner: state => (state.game ? state.game.winner : null),
   },
   mutations: {
     ...vuexfireMutations,
@@ -51,7 +52,7 @@ const store = new Vuex.Store({
     },
   },
   actions: {
-    async createNewGame({ commit, dispatch }) {
+    async createNewGame({ commit, dispatch }, gameId) {
       const board = await getGameboard();
 
       if (!board) {
@@ -60,11 +61,25 @@ const store = new Vuex.Store({
 
       const gameData = await dispatch('setupGame', board);
 
-      return gamesCollection.add(gameData).then(docRef => {
+      const handleSuccess = docRef => {
         console.log(`Created game with ID of ${docRef.id}`);
         commit('setGameId', docRef.id);
         return docRef.id;
-      });
+      };
+
+      if (!gameId) {
+        return gamesCollection.add(gameData).then(handleSuccess);
+      }
+
+      const filteredGameId = gameId.replace(/\s/g, '-');
+      const ref = gamesCollection.doc(filteredGameId);
+      const doc = await ref.get();
+
+      if (doc.exists) {
+        throw new Error('That Game ID already exists. Please pick a new one.');
+      }
+
+      return ref.set(gameData).then(() => handleSuccess({ id: filteredGameId }));
     },
 
     async createNewBoard({ state, dispatch }) {
@@ -111,19 +126,44 @@ const store = new Vuex.Store({
     },
 
     bindGameboard: firestoreAction(({ bindFirestoreRef, commit }, gameId) => {
-      return bindFirestoreRef('game', gamesCollection.doc(gameId)).then(gameData => {
-        commit('setGame', gameData);
-        commit('setGameId', gameId);
-        if (gameData.winner) {
-          commit('lockBoard');
-        }
-      });
+      return bindFirestoreRef('game', gamesCollection.doc(gameId), { reset: false }).then(
+        gameData => {
+          if (gameData === null) {
+            commit('setGameId', false);
+            return;
+          }
+
+          commit('setGame', gameData);
+          commit('setGameId', gameId);
+          if (gameData.winner) {
+            commit('lockBoard');
+          }
+        },
+      );
     }),
+
+    async renameGameboard({ dispatch, state }, newId) {
+      const ref = gamesCollection.doc(newId);
+      const doc = await ref.get();
+      const oldId = state.gameId;
+
+      if (doc.exists) {
+        throw new Error('Name already exists.');
+      }
+
+      await ref.set(state.game);
+
+      return dispatch('bindGameboard', newId).then(() => {
+        router.replace(`/${newId}`, () => {
+          gamesCollection.doc(oldId).delete();
+        });
+      });
+    },
   },
 });
 
 store.watch(
-  state => state.game.boardId,
+  state => (state.game ? state.game.boardId : null),
   () => {
     store.commit('unlockBoard');
     store.commit('setSpymaster', false);
