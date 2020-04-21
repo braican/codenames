@@ -15,9 +15,10 @@
         <button class="add-new-input" type="button" @click="addNewInput">&plus;</button>
       </div>
 
-      <button class="button" type="submit">
-        Add {{ newWords.length }} word{{ newWords.length === 1 ? '' : 's' }}
-      </button>
+      <button
+        class="button"
+        type="submit"
+      >Add {{ newWords.length }} word{{ newWords.length === 1 ? '' : 's' }}</button>
     </form>
 
     <div class="word-list">
@@ -68,7 +69,10 @@ export default {
       }, 0);
     },
     async addNewWord() {
-      const newWords = this.words.filter(v => v !== '');
+      const lowercaseWords = this.storedWords.map(w => w.toLowerCase());
+      const newWords = this.words.filter(
+        w => w !== '' && !lowercaseWords.includes(w.toLowerCase()),
+      );
       const newStoreWords = [...this.storedWords, ...newWords];
       const chunks = {};
       let index = 1;

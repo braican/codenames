@@ -16,7 +16,7 @@ export const retrieveWords = async () => {
       words.push(...chunks[chunk]);
     });
 
-    return words;
+    return words.sort();
   } catch (e) {
     console.error('There was a problem getting the words.', e);
     return [];

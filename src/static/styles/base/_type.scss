@@ -73,12 +73,23 @@ button {
       background-color: darken($c--blue, 6%);
     }
   }
+
+  &--full {
+    width: 100%;
+  }
 }
 
 .button--secondary {
+  @include transition(background-color);
   display: inline-block;
-  background-color: $c--gray-e;
-  padding: 0.5em;
+  // background-color: $c--gray-e;
+  padding: 0.8em 1em;
+  border: 2px solid $c--gray-a;
+  color: $c--white;
+
+  &:hover {
+    background-color: rgba($c--gray-c, 0.2);
+  }
 }
 
 // Headers
