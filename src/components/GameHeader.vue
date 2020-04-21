@@ -1,10 +1,5 @@
 <template>
   <header class="header">
-    <div class="score">
-      <span class="red-team">{{ redScore }}</span> &mdash;
-      <span class="blue-team">{{ blueScore }}</span>
-    </div>
-
     <div v-if="winner === null" :class="['turn', turn === 'Red' ? 'red-team' : 'blue-team']">
       Turn: {{ turn }}
     </div>
@@ -17,6 +12,11 @@
       >
         End {{ turn }}'s turn
       </button>
+    </div>
+
+    <div class="score">
+      <span class="red-team">{{ redScore }}</span> &mdash;
+      <span class="blue-team">{{ blueScore }}</span>
     </div>
 
     <div v-if="winner" class="winner">
@@ -52,22 +52,17 @@ export default {
 @import '@/static/styles/_abstracts.scss';
 
 .header {
-  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
   font-size: 1.5rem;
-
-  @include mq($bp--small) {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
 }
 
 .score {
-  @include mq($bp--small, max) {
-    position: absolute;
-    top: 0;
-    right: 0;
+  @include mq($bp--small) {
+    order: -1;
   }
 
   .red-team {
@@ -85,6 +80,8 @@ export default {
   font-weight: $fw--bold;
   padding: 1rem 2rem;
   color: $c--white;
+  text-align: center;
+  width: 100%;
 
   &.red-team {
     background-color: $c--red;
@@ -94,6 +91,7 @@ export default {
   }
 
   @include mq($bp--small) {
+    width: auto;
     margin-left: 1rem;
     margin-right: 1rem;
     margin-top: 0;

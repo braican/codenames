@@ -52,7 +52,7 @@ const store = new Vuex.Store({
     },
   },
   actions: {
-    async createNewGame({ commit, dispatch }) {
+    async createNewGame({ commit, dispatch }, gameId) {
       const board = await getGameboard();
 
       if (!board) {
@@ -61,11 +61,25 @@ const store = new Vuex.Store({
 
       const gameData = await dispatch('setupGame', board);
 
-      return gamesCollection.add(gameData).then(docRef => {
+      const handleSuccess = docRef => {
         console.log(`Created game with ID of ${docRef.id}`);
         commit('setGameId', docRef.id);
         return docRef.id;
-      });
+      };
+
+      if (!gameId) {
+        return gamesCollection.add(gameData).then(handleSuccess);
+      }
+
+      const filteredGameId = gameId.replace(/\s/g, '-');
+      const ref = gamesCollection.doc(filteredGameId);
+      const doc = await ref.get();
+
+      if (doc.exists) {
+        throw new Error('That Game ID already exists. Please pick a new one.');
+      }
+
+      return ref.set(gameData).then(() => handleSuccess({ id: filteredGameId }));
     },
 
     async createNewBoard({ state, dispatch }) {

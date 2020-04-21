@@ -3,7 +3,9 @@
     <button
       :class="['toggle-label', spymaster === false && 'toggle--active']"
       @click="() => setSpymaster(false)"
-    >Player</button>
+    >
+      Player
+    </button>
     <button
       :class="['track', spymaster ? 'track--right' : 'track--left']"
       @click="() => setSpymaster(!spymaster)"
@@ -11,7 +13,9 @@
     <button
       :class="['toggle-label', spymaster === true && 'toggle--active']"
       @click="() => setSpymaster(true)"
-    >Spymaster</button>
+    >
+      Spymaster
+    </button>
   </div>
 </template>
 
@@ -33,7 +37,6 @@ export default {
 .toggle {
   display: flex;
   align-items: center;
-  margin-top: 1rem;
 }
 
 .toggle-label {

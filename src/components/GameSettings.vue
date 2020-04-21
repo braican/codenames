@@ -8,10 +8,13 @@
     </button>
 
     <div :class="['panel', panelActive && 'panel--active']">
-      <button class="close-button" @click="panelActive = false">
-        <span>Close</span>
-        <Close />
-      </button>
+      <div class="header">
+        <router-link class="home-link" to="/"><Home /> <span>Home</span></router-link>
+        <button class="close-button" @click="panelActive = false">
+          <span>Close</span>
+          <Close />
+        </button>
+      </div>
 
       <div class="actions">
         <Label />
@@ -31,11 +34,12 @@ import { mapActions } from 'vuex';
 import Label from '@/components/Settings/Label';
 import Renamer from '@/components/Settings/Renamer';
 import Cog from '@/static/svg/settings.svg';
+import Home from '@/static/svg/home.svg';
 import Close from '@/static/svg/close.svg';
 
 export default {
   name: 'GameSettings',
-  components: { Label, Renamer, Cog, Close },
+  components: { Label, Renamer, Cog, Home, Close },
   data() {
     return {
       panelActive: false,
@@ -86,7 +90,7 @@ export default {
     color: $c--gray-3;
   }
 
-  @media (min-height: 840px) {
+  @media (min-height: 840px) and (min-width: $bp--desktop) {
     position: absolute;
     padding-right: 1rem;
   }
@@ -106,7 +110,7 @@ export default {
   max-width: 400px;
   background-color: $c--gray-3;
   box-shadow: 10px 0 10px 10px rgba(0, 0, 0, 0.6);
-  padding: 4rem 2rem 2rem;
+  padding: 2rem;
 
   .actions {
     flex: 1;
@@ -117,12 +121,34 @@ export default {
   }
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.home-link {
+  @include transition(color);
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: $c--gray-a;
+  font-size: $fz--sm;
+
+  svg {
+    width: 18px;
+    fill: currentColor;
+    margin-right: 0.5rem;
+  }
+
+  &:hover {
+    color: $c--gray-e;
+  }
+}
+
 .close-button {
   @include transition(color);
   color: $c--gray-c;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
   display: flex;
   align-items: center;
   color: $c--gray-a;
