@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { vuexfireMutations, firestoreAction } from 'vuexfire';
 import { auth, gamesCollection } from '@/firebase';
+import router from '@/router';
 import { getGameboard } from '@/utils';
 
 Vue.use(Vuex);
@@ -22,11 +23,11 @@ const store = new Vuex.Store({
     spymaster: false,
   },
   getters: {
-    board: state => state.game.board,
-    turn: state => state.game.turn,
-    redScore: state => state.game.redScore,
-    blueScore: state => state.game.blueScore,
-    winner: state => state.game.winner,
+    board: state => (state.game ? state.game.board : null),
+    turn: state => (state.game ? state.game.turn : null),
+    redScore: state => (state.game ? state.game.redScore : null),
+    blueScore: state => (state.game ? state.game.blueScore : null),
+    winner: state => (state.game ? state.game.winner : null),
   },
   mutations: {
     ...vuexfireMutations,
@@ -111,19 +112,39 @@ const store = new Vuex.Store({
     },
 
     bindGameboard: firestoreAction(({ bindFirestoreRef, commit }, gameId) => {
-      return bindFirestoreRef('game', gamesCollection.doc(gameId)).then(gameData => {
-        if (gameData === null) {
-          commit('setGameId', false);
-          return;
-        }
+      return bindFirestoreRef('game', gamesCollection.doc(gameId), { reset: false }).then(
+        gameData => {
+          if (gameData === null) {
+            commit('setGameId', false);
+            return;
+          }
 
-        commit('setGame', gameData);
-        commit('setGameId', gameId);
-        if (gameData.winner) {
-          commit('lockBoard');
-        }
-      });
+          commit('setGame', gameData);
+          commit('setGameId', gameId);
+          if (gameData.winner) {
+            commit('lockBoard');
+          }
+        },
+      );
     }),
+
+    async renameGameboard({ dispatch, state }, newId) {
+      const ref = gamesCollection.doc(newId);
+      const doc = await ref.get();
+      const oldId = state.gameId;
+
+      if (doc.exists) {
+        throw new Error('Name already exists.');
+      }
+
+      await ref.set(state.game);
+
+      return dispatch('bindGameboard', newId).then(() => {
+        router.replace(`/${newId}`, () => {
+          gamesCollection.doc(oldId).delete();
+        });
+      });
+    },
   },
 });
 

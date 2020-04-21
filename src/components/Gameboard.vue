@@ -120,7 +120,7 @@ export default {
   justify-content: center;
   background-color: $c--gray-e;
   height: 12vh;
-  min-height: 3.5rem;
+  min-height: 3.25rem;
   padding: 0.8rem;
   font-weight: $fw--bold;
   text-transform: uppercase;

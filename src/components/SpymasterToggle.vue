@@ -33,6 +33,7 @@ export default {
 .toggle {
   display: flex;
   align-items: center;
+  margin-top: 1rem;
 }
 
 .toggle-label {

@@ -6,16 +6,11 @@
     <div v-else-if="gameId" class="game-wrapper">
       <GameHeader />
       <Gameboard />
-      <GameFooter />
 
-      <div class="game-info">
-        <p class="game-label">Game {{ this.$route.params.gameId }}</p>
-        <button
-          @click="copy"
-          class="button--secondary copy-game-url"
-          v-clipboard:copy="gameUrl"
-        >Copy game url</button>
-        <p :class="['copy-message', copied && 'copy-message--visible']">Copied</p>
+      <div class="game-footer">
+        <SpymasterToggle />
+
+        <GameSettings />
       </div>
     </div>
     <div v-else class="loading">
@@ -25,34 +20,28 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import GameHeader from '@/components/GameHeader';
 import Gameboard from '@/components/Gameboard';
-import GameFooter from '@/components/GameFooter';
+import SpymasterToggle from '@/components/SpymasterToggle';
+import GameSettings from '@/components/GameSettings';
 
 export default {
   name: 'Game',
-  components: { GameHeader, Gameboard, GameFooter },
+  components: { GameHeader, Gameboard, SpymasterToggle, GameSettings },
   data() {
     return {
       loading: false,
-      copied: false,
     };
   },
   computed: {
     ...mapState(['gameId']),
-    gameUrl() {
-      return `https://codenames.braican.com/g/${this.$route.params.gameId}`;
-    },
   },
   methods: {
-    copy() {
-      this.copied = true;
-      setTimeout(() => (this.copied = false), 5000);
-    },
+    ...mapActions(['bindGameboard']),
   },
   mounted() {
-    this.$store.dispatch('bindGameboard', this.$route.params.gameId);
+    this.bindGameboard(this.$route.params.gameId);
   },
 };
 </script>
@@ -64,37 +53,14 @@ export default {
   width: 100%;
 }
 
-.game-wrapper {
-  position: relative;
-}
-
 .loading {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.game-info {
-  margin-top: 2rem;
+.game-footer {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.game-label {
-  width: 100%;
-  margin-bottom: 1rem;
-  font-size: 0.8rem;
-  color: $c--gray-a;
-}
-
-.copy-message {
-  transition: opacity 0.2s;
-  opacity: 0;
-  color: $c--orange;
-  margin-left: 1rem;
-}
-.copy-message--visible {
-  opacity: 1;
+  justify-content: space-between;
 }
 </style>
